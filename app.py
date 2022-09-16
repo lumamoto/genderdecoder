@@ -70,7 +70,6 @@ def display_analysis(df):
         # st.write(f"Avg # of masculine words: {avg_masc_total}")
         # st.write(f"Avg # of feminine words: {avg_fem_total}")
 
-        st.write("Coding counts:")
         st.write(df_total_res)
 
         # ls = df["masculine_coded_words"].tolist()
@@ -86,7 +85,6 @@ def display_analysis(df):
         # st.write(f"Avg # of masculine words: {avg_masc_sci}")
         # st.write(f"Avg # of feminine words: {avg_fem_sci}")
 
-        st.write("Coding counts:")
         st.write(df_sci_res)
 
         # ls = df_sci["masculine_coded_words"].tolist()
@@ -109,7 +107,6 @@ def display_analysis(df):
         # st.write(f"Avg # of masculine words: {avg_masc_eng}")
         # st.write(f"Avg # of feminine words: {avg_fem_eng}")
 
-        st.write("Coding counts:")
         st.write(df_eng_res)
 
     # Get average number of masc/fem words
@@ -132,6 +129,9 @@ def main():
     st.write('Result:', gd.assess(txt))
 
     st.header("Data Analysis")
+    df_def = pd.read_csv("data/def.csv")
+    st.write(df_def)
+
     df = create_df()
     display_analysis(df)
 
