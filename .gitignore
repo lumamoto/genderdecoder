@@ -1,11 +1,2 @@
-*.pyc
-*.pyc
-.DS_Store
-.Python
-bin
-include
-lib
-man
-pip-selfcheck.json
-dist
-genderdecoder.egg-info/
+__pycache__
+keys.py
