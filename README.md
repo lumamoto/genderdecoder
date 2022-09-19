@@ -22,6 +22,61 @@ From Kat Matfield's Gender Decoder [About](http://gender-decoder.katmatfield.com
 > noun, verb and adjective variants; for instance, "compet" covers "compete", 
 > "competitive" and "competition".
 
+Masculine-Coded | Feminine-Coded
+---|---
+active- | agree-
+adventurous- | affectionate-
+aggress- | child-
+ambitio- | cheer-
+analy- | collab-
+assert- | commit-
+athlet- | communal-
+autonom- | compassion-
+battle- | connect-
+boast- | considerate-
+challeng- | cooperat-
+champion- | co-operat-
+compet- | depend-
+confident- | emotiona-
+courag- | empath-
+decid- | feel-
+decision- | flatterable-
+decisive- | gentle-
+defend- | honest-
+determin- | interpersonal-
+domina- | interdependen-
+dominant- | interpersona-
+driven- | inter-personal-
+fearless- | inter-dependen-
+fight- | inter-persona-
+force- | kind-
+greedy- | kinship-
+head-strong- | loyal-
+headstrong- | modesty-
+hierarch- | nag-
+hostil- | nurtur-
+impulsive- | pleasant-
+independen- | polite-
+individual- | quiet-
+intellect- | respon-
+lead- | sensitiv-
+logic- | submissive-
+objective- | support-
+opinion- | sympath-
+outspoken- | tender-
+persist- | together-
+principle- | trust-
+reckless- | understand-
+self-confiden- | warm-
+self-relian- | whin-
+self-sufficien- | enthusias-
+selfconfiden- | inclusive-
+selfrelian- | yield-
+selfsufficien- | share-
+stubborn- | sharin-
+superior- |
+unreasonab- |
+
 ## Built With
 - [Streamlit](https://streamlit.io/)
 - [genderdecoder](https://github.com/Doteveryone/genderdecoder)
