@@ -1,9 +1,63 @@
 import pandas as pd
 import streamlit as st
-import numpy as np
-import genderdecoder.gd as gd
 from collections import Counter
 import altair as alt
+from util import write_horizontally, str_to_list, get_list_length, init_page
+from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid.shared import GridUpdateMode
+
+
+def main():
+    init_page("Data")
+
+    st.write('''
+    The following data was collected using [SerpApi](https://serpapi.com/), 
+    using the [Google Jobs API](https://serpapi.com/google-jobs-api).
+
+    Using the **dropdown** below, you may view _Overall_, _Scientist_, and _Engineer_ data.
+    - The _Scientist_ data consists of job results from "scientist" and "data scientist" queries.
+    - The _Engineer_ data consists of job results from "engineer" and "software engineer" queries.
+    - The _Overall_ data consists of both the _Scientist_ and _Engineer_ data.
+    ''')
+
+    df = create_df()
+    df_sci = df[(df["query"] == "scientist") |
+                (df["query"] == "data scientist")]
+    df_eng = df[(df["query"] == "engineer") |
+                (df["query"] == "software engineer")]
+
+    option = st.selectbox(
+        "Dataset to View", ("Overall", "Scientist", "Engineer"))
+
+    if option == "Scientist":
+        display_analysis(df_sci, "Scientist")
+    elif option == "Engineer":
+        display_analysis(df_eng, "Engineer")
+    else:
+        display_analysis(df, "Overall")
+
+
+def aggrid_interactive_table(df):
+    """Creates an st-aggrid interactive table based on a dataframe.
+
+    Args:
+        df (pd.DataFrame]): Source dataframe
+
+    Returns:
+        dict: The selected row
+    """
+    options = GridOptionsBuilder.from_dataframe(
+        df, enableRowGroup=True, enableValue=True, enablePivot=True
+    )
+    options.configure_side_bar()
+    options.configure_selection("single")
+    AgGrid(
+        df,
+        enable_enterprise_modules=True,
+        gridOptions=options.build(),
+        update_mode=GridUpdateMode.MODEL_CHANGED,
+        allow_unsafe_jscode=True,
+    )
 
 def create_df():
     # Read CSV
@@ -30,21 +84,6 @@ def create_df():
     # Drop rows with nan values
     df.dropna()
     return df
-
-
-def str_to_list(s):
-    try:
-        s = s.replace("'", "").strip()
-        return s[1:-1].split(",")
-    except Exception:
-        return np.nan
-
-
-def get_list_length(l):
-    try:
-        return int(len(l))
-    except Exception:
-        return np.nan
 
 
 def get_most_common_df(df, coding):
@@ -78,16 +117,6 @@ def get_most_common_df(df, coding):
     return most_common_df
 
 
-def display_horiz(x, y):
-    col1, col2 = st.columns(2)
-    # Left Column
-    with col1:
-        st.write(x)
-    # Right Column
-    with col2:
-        st.write(y)
-
-
 def display_analysis(df, title):
     # Get number of jobs
     num_jobs = df.shape[0]
@@ -97,83 +126,52 @@ def display_analysis(df, title):
     avg_num_fem_words = int(df.describe()["num_feminine_words"]["mean"])
 
     # Get number of masc/fem results
-    res_df = df.groupby("result").size(
-    ).reset_index().reindex([4, 1, 2, 0, 3])
+    res_df = df.groupby("result").size().reset_index().reindex(
+        [4, 1, 2, 0, 3])
     res_df.columns = ["coding", "num_ads"]
 
     # Get most common word dfs
     masc_word_df = get_most_common_df(df, "masculine")
     fem_word_df = get_most_common_df(df, "feminine")
 
-    st.title(title)
-
-    st.write(f"Number of ads: **{num_jobs}**")
-
+    # Create graphs
     res_graph = alt.Chart(res_df).mark_bar().encode(
         x=alt.X("num_ads"),
         y=alt.Y("coding", sort=None)).properties(
         width=350, height=230)
-
     masc_word_graph = alt.Chart(masc_word_df).mark_bar().encode(
         x=alt.X("count"),
         y=alt.Y("word", sort=None)).properties(
         width=200, height=400)
-
     fem_word_graph = alt.Chart(fem_word_df).mark_bar().encode(
         x=alt.X("count"),
         y=alt.Y("word", sort=None)).properties(
         width=200, height=400)
 
+    st.header(title)
+    st.metric(label="Number of Ads", value=num_jobs)
+
     st.subheader("Coding Counts")
-    display_horiz(res_df, res_graph)
+    write_horizontally(res_df, res_graph)
 
     st.subheader("20 Most Common Masculine Words")
     st.write(
         f"Average number of _masculine_ words per ad: **{avg_num_masc_words}**")
-    display_horiz(masc_word_df, masc_word_graph)
+    write_horizontally(masc_word_df, masc_word_graph)
 
     st.subheader("20 Most Common Feminine Words")
     st.write(
         f"Average number of _feminine_ words per ad: **{avg_num_fem_words}**")
-    display_horiz(fem_word_df, fem_word_graph)
+    write_horizontally(fem_word_df, fem_word_graph)
 
+    st.header("Data Table")
+    with st.expander("Expand / Collapse Table"):
+        st.write('''
+        Looking for results for a specific company or job title? Click on _Filters_.
 
-def main():
-    st.title("Job Ad Gender Decoder")
-    st.write("This is a tool that determines gender bias in job advertisements.")
-    st.write(f"This application uses the Python package, [genderdecoder](https://github.com/Doteveryone/genderdecoder), by Richard Pope, "
-             "which uses the analysis code from [gender-decoder.katmatfield.com](http://gender-decoder.katmatfield.com) by Kat Mayfield, "
-             "which is based on the paper, [Evidence That Gendered Wording in Job Advertisements Exists and Sustains Gender Inequality]"
-             "(http://gender-decoder.katmatfield.com/static/Gaucher-Friesen-Kay-JPSP-Gendered-Wording-in-Job-ads.pdf), "
-             "by Danielle Gaucher, Justin Friesen, and Aaron C. Kay.")
-
-    st.header("Tool")
-    txt = st.text_area("Job Description", "Paste text here")
-    st.write("Result:", gd.assess(txt))
-
-    # st.header("Data Analysis")
-    # df_def = pd.read_csv("data/def.csv")
-    # st.write(df_def)
-
-    df = create_df()
-    # Create separate dfs for sci and eng queries
-    df_sci = df[(df["query"] == "scientist") |
-                (df["query"] == "data scientist")]
-    df_eng = df[(df["query"] == "engineer") |
-                (df["query"] == "software engineer")]
-
-    option = st.selectbox(
-        "Data to View", ("Overall", "Scientists", "Engineers"))
-
-    if option == "Scientists":
-        display_analysis(df_sci, "Scientists")
-    elif option == "Engineers":
-        display_analysis(df_eng, "Engineers")
-    else:
-        display_analysis(df, "Overall")
-
-    st.header("Raw Data")
-    st.write(df)
+        Too many columns? Uncheck a few by clicking on _Columns_.
+        ''')
+        aggrid_interactive_table(df)
 
 
 main()
