@@ -15,9 +15,9 @@ def main():
     using the [Google Jobs API](https://serpapi.com/google-jobs-api).
 
     Using the **dropdown** below, you may view _Overall_, _Scientist_, and _Engineer_ data.
-    - The _Scientist_ data consists of job results from "scientist" and "data scientist" queries.
-    - The _Engineer_ data consists of job results from "engineer" and "software engineer" queries.
-    - The _Overall_ data consists of both the _Scientist_ and _Engineer_ data.
+    - _Scientist_ data consists of job results from "scientist" and "data scientist" queries.
+    - _Engineer_ data consists of job results from "engineer" and "software engineer" queries.
+    - _Overall_ data consists of both _Scientist_ and _Engineer_ data.
     ''')
 
     df = create_df()
@@ -38,14 +38,7 @@ def main():
 
 
 def aggrid_interactive_table(df):
-    """Creates an st-aggrid interactive table based on a dataframe.
-
-    Args:
-        df (pd.DataFrame]): Source dataframe
-
-    Returns:
-        dict: The selected row
-    """
+    """Creates an st-aggrid interactive table based on a dataframe."""
     options = GridOptionsBuilder.from_dataframe(
         df, enableRowGroup=True, enableValue=True, enablePivot=True
     )
@@ -57,7 +50,7 @@ def aggrid_interactive_table(df):
         gridOptions=options.build(),
         update_mode=GridUpdateMode.MODEL_CHANGED,
         allow_unsafe_jscode=True,
-    )
+        height=500)
 
 def create_df():
     # Read CSV
@@ -81,8 +74,14 @@ def create_df():
         lambda x: get_list_length(x))
     df["num_feminine_words"] = df["feminine_coded_words"].apply(
         lambda x: get_list_length(x))
+
     # Drop rows with nan values
-    df.dropna()
+    df = df.dropna()
+
+    # Move result column to right of company_name
+    res_column = df.pop('result')
+    df.insert(2, 'result', res_column)
+
     return df
 
 
@@ -164,14 +163,13 @@ def display_analysis(df, title):
         f"Average number of _feminine_ words per ad: **{avg_num_fem_words}**")
     write_horizontally(fem_word_df, fem_word_graph)
 
-    st.header("Data Table")
-    with st.expander("Expand / Collapse Table"):
-        st.write('''
-        Looking for results for a specific company or job title? Click on _Filters_.
+    st.subheader("Data Table")
+    st.write('''
+    Looking for results for a specific company or job title? Click on _Filters_.
 
-        Too many columns? Uncheck a few by clicking on _Columns_.
-        ''')
-        aggrid_interactive_table(df)
+    Too many columns? Hide a few by clicking on _Columns_.
+    ''')
+    aggrid_interactive_table(df)
 
 
 main()
