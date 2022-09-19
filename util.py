@@ -39,7 +39,7 @@ def get_ordered_list(l):
 
 def init_page(page):
     st.set_page_config(
-        page_title=f"Gender Decoder - {page}",
+        page_title=f"{page} | Gender Decoder",
     )
 
     with st.sidebar:
