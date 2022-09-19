@@ -6,7 +6,7 @@ from util import write_horizontally, get_ordered_list, init_page
 def main():
     init_page("Tool")
 
-    st.write("Find a job ad and paste its job description below to reveal any gender bias.")
+    st.write("Find a job ad and paste its job description below to reveal any gender bias it may contain.")
 
     write_form()
 
